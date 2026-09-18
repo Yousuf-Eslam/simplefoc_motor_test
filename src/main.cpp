@@ -6,11 +6,18 @@
 // 2 BTS7960 for each phase (A and B)
 // 2 ACS712 for current sensing
 // put function declarations here:
-StepperMotor motor = StepperMotor(); //Check driver PWM count
-StepperDriver4PWM driver = StepperDriver4PWM(TODO,TODO,TODO,TODO); //Check driver PWM count
+//  StepperMotor(int pp, (optional R, KV, Ld, Lq))
+//  - pp  - pole pair number
+//  - R   - phase resistance value [Ohm] - optional
+//  - KV  - motor KV rating [rpm/V] - optional
+//  - Ld  - d axis inductance value [H] - optional
+//  - Lq  - q axis inductance value [H] - optional
+StepperMotor motor = StepperMotor(50); //Check driver PWM count
+// StepperDriver4PWM(ph1A, ph1B, ph2A, ph2B, (en1, en2 optional))
+StepperDriver4PWM driver = StepperDriver4PWM(18,19,33,25,26,27); 
 
-// encoder instance
-Encoder encoder = Encoder(TODO,TODO); //Check encoder pins
+// encoder instances
+Encoder encoder = Encoder(21,22,4096); //Check encoder pins
 // channel A and B;
 void doA() { encoder.handleA(); }
 void doB() { encoder.handleB(); }
@@ -28,7 +35,8 @@ encoder.init();
 encoder.enableInterrupts(doA, doB);
 motor.linkSensor(&encoder);
 //Initialize Driver
-driver.voltage_limit = TODO;
+driver.voltage_power_supply = 27;
+driver.voltage_limit = 27;
 if(!driver.init()){
   Serial.println("Driver initialization failed");
 return;
@@ -36,13 +44,13 @@ return;
 motor.linkDriver(&driver);
 
 
+motor.voltage_sensor_align = 3; //Alligns motor with sensor 0 position
 
 
-motor.voltage_limit = TODO;
 
 //Motion Control method
 motor.torque_controller = TorqueControlType::voltage;
-motor.controller = MotionControlType::torque;
+motor.controller = MotionControlType::velocity;
 motor.useMonitoring(Serial);
 
 //Initializing Motor
