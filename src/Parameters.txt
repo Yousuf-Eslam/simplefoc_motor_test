@@ -1,0 +1,3 @@
+Velocity is 21.78 rad/s at 5 volts.
+KV = 41.6
+Remember

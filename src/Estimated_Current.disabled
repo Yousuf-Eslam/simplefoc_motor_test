@@ -1,0 +1,64 @@
+#include <SimpleFOC.h>
+
+// Stepper motor & driver instance
+// StepperMotor(pole pair number, phase resistance [Ohms], KV rating [rpm/V], q-axis inductance [H], d-axis inductance [H])
+StepperMotor motor = StepperMotor(50, 3.5, 41.6);
+StepperDriver4PWM driver = StepperDriver4PWM(18, 19, 33, 25, 26, 27);
+
+// encoder instance
+MagneticSensorI2C sensor = MagneticSensorI2C(AS5600_I2C);
+
+// instantiate the commander
+Commander command = Commander(Serial);
+void doMotor(char* cmd) { command.motor(&motor, cmd); }
+
+void setup() { 
+  
+  // initialize encoder sensor hardware
+ // sensor (SDA 21, SCL 22), read only, not linked to the motor
+  Wire.begin(21, 22);
+  sensor.init(&Wire); 
+  // link the motor to the sensor
+  motor.linkSensor(&sensor);
+
+  // driver config
+  // power supply voltage [V]
+  driver.voltage_power_supply = 12;
+  driver.init();
+  // link driver
+  motor.linkDriver(&driver);
+
+  // set the torque control type
+  motor.torque_controller = TorqueControlType::estimated_current;
+  // set motion control loop to be used
+  motor.controller = MotionControlType::velocity;
+
+  // use monitoring with serial 
+  Serial.begin(115200);
+  // comment out if not needed
+  motor.useMonitoring(Serial);
+
+  // initialize motor
+  motor.init();
+  // align sensor and start FOC
+  motor.initFOC();
+
+  // add target command M
+  command.add('M', doMotor, "motor");
+
+  Serial.println(F("Motor ready."));
+  Serial.println(F("Set the target current using serial terminal:"));
+  _delay(1000);
+}
+
+void loop() {
+
+  // main FOC algorithm function
+  motor.loopFOC();
+
+  // Motion control function
+  motor.move();
+
+  // user communication
+  command.run();
+}

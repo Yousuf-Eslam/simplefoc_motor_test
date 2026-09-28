@@ -1,0 +1,3 @@
+- Setup simpleFOC's latest version with the esp vs code compiler.
+- Watch closed loop on stepper video FOC.
+- Understand INITFOC() because the pole count isn't measured correctly.

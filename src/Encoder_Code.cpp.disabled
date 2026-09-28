@@ -1,0 +1,55 @@
+#include <SimpleFOC.h>
+
+StepperMotor motor = StepperMotor(50);
+StepperDriver4PWM driver = StepperDriver4PWM(18, 19, 33, 25, 26, 27);
+MagneticSensorI2C sensor = MagneticSensorI2C(AS5600_I2C);
+Commander command = Commander(Serial);
+void doTarget(char* cmd) { command.scalar(&motor.target, cmd); }
+void doLimit(char* cmd) { command.scalar(&motor.voltage_limit, cmd); }
+
+void setup() {
+  Serial.begin(115200);
+  SimpleFOCDebug::enable(&Serial);
+
+  // sensor (SDA 21, SCL 22), read only, not linked to the motor
+  Wire.begin(21, 22);
+  sensor.init(&Wire);
+
+  driver.voltage_power_supply = 12;
+  driver.voltage_limit = 12;
+  if (!driver.init()) {
+    Serial.println("Driver init failed!");
+    return;
+  }
+  motor.linkDriver(&driver);
+  motor.voltage_limit = 2;
+  motor.controller = MotionControlType::velocity_openloop;
+  if (!motor.init()) {
+    Serial.println("Motor init failed!");
+    return;
+  }
+  motor.target = 6.28; // one rotation per second
+  command.add('T', doTarget, "target velocity");
+  command.add('L', doLimit, "voltage limit");
+  Serial.println("Motor ready!");
+  Serial.println("Set target velocity [rad/s]");
+  _delay(1000);
+}
+
+void loop() {
+ motor.loopFOC();
+  motor.move();
+  command.run();
+
+  // read the sensor every loop so velocity stays accurate
+  sensor.update();
+
+  // print at 5 Hz so it doesn't flood the serial monitor
+  static unsigned long t = 0;
+  if (millis() - t > 200) {
+    t = millis();
+    Serial.print(sensor.getAngle());
+    Serial.print("\t");
+    Serial.println(sensor.getVelocity());
+  }
+}

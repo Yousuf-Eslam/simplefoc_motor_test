@@ -1,0 +1,35 @@
+#include <SimpleFOC.h>
+StepperMotor motor = StepperMotor(50,3.5,41.6);
+StepperDriver4PWM driver = StepperDriver4PWM(18, 19, 33, 25, 26, 27);
+Commander command = Commander(Serial);
+void doTarget(char* cmd) { command.scalar(&motor.target, cmd); }
+void doLimit(char* cmd) { command.scalar(&motor.current_limit, cmd); }
+void setup() {
+  Serial.begin(115200);
+  SimpleFOCDebug::enable(&Serial);
+  driver.voltage_power_supply = 12;
+  driver.voltage_limit = 12;
+  if (!driver.init()) {
+    Serial.println("Driver init failed!");
+    return;
+  }
+  motor.linkDriver(&driver);
+  motor.current_limit = 1;
+  motor.torque_controller = TorqueControlType::estimated_current;
+  motor.controller = MotionControlType::velocity_openloop;
+  if (!motor.init()) {
+    Serial.println("Motor init failed!");
+    return;
+  }
+  motor.target = 6.28; // one rotation per second
+  command.add('T', doTarget, "target velocity");
+  command.add('L', doLimit, "current limit");
+  Serial.println("Motor ready!");
+  Serial.println("Set target velocity [rad/s]");
+  _delay(1000);
+}
+void loop() {
+  motor.loopFOC();
+  motor.move();
+  command.run();
+}
