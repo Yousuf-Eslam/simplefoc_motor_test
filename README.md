@@ -15,7 +15,8 @@ https://github.com/user-attachments/assets/453698d9-2cc4-4c51-9a08-1e32564352d4
 PCB was designed by Hady Ahmed and Ali Mahmoud
 
 <img width="587" height="715" alt="image" src="https://github.com/user-attachments/assets/dfd67e2b-d9e9-4d16-aae6-d5ef57beabff" />
-<img width="412" height="493" alt="image" src="https://github.com/user-attachments/assets/d5229f9f-551f-4127-8109-3925d14173ee" />
+<img width="1520" height="840" alt="image" src="https://github.com/user-attachments/assets/ee51069a-19ae-42ec-aad7-7ad13646a1e1" />
+
 
 
 
