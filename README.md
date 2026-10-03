@@ -19,6 +19,6 @@ PCB was designed by Hady Ahmed and Ali Mahmoud
 
 
 
-Setup and testing was done by Abdelrahman Lashen.
+Setup and testing was done by  Abdelrahman Lashen.
 
-*Phase 1 of the graduation project lead لاغ Mohammed Farouq*
+*Phase 1 of the graduation project lead by Mohammed Farouq*
